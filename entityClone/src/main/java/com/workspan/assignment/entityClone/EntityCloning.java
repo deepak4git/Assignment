@@ -5,6 +5,7 @@ public class EntityCloning {
 	static long currentMaxID = Integer.MIN_VALUE;
 	static List<Entity> entity =null;
 	static List<Link> link = null;
+	static Map<Long,Long> clones = new HashMap<Long,Long>();
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -37,6 +38,7 @@ public class EntityCloning {
 		// create new entity for clone
 		cloneEntity(5);
 		printEntity();
+		printLink();
 		
 	}
  
@@ -44,12 +46,67 @@ public class EntityCloning {
 		return entity.get(entity.size() - 1).getEntityID();	
 	}
 	
-	public static void cloneEntity(int cloneID) {
-		// Add the clone Entity
-		addEntity(cloneID);
+	public static List<Long> getAncestor(long cloneID) {
+		List<Long> ancestor =  new ArrayList<Long>();
+		for(Link l : link) {
+			if(l.getTo() == cloneID) {
+				ancestor.add(l.getFrom());
+			}
+		}
+		return ancestor;
 	}
 	
-	public static Entity findAndCreateClone(int cloneID) {
+	public static List<Long> getpredecessor(long cloneID) {
+		List<Long> predecessor =  new ArrayList<Long>();
+		for(Link l : link) {
+			if(l.getFrom() == cloneID) {
+				predecessor.add(l.getTo());
+				predecessor.addAll(getpredecessor(l.getTo()));
+			}
+		}
+		return predecessor;
+	}
+	
+	public static void cloneEntity(long cloneID) {
+		// get the ancestor
+		List<Long> ancestor =  getAncestor(cloneID);
+  
+       // get the predecessor 	
+		List<Long> predecessor =  getpredecessor(cloneID);
+		
+	   // Add a new clone entity for parent clone ID
+		long newclone = Integer.MIN_VALUE;
+		
+		if(clones.containsKey(cloneID)) {
+			newclone = clones.get(cloneID);
+		  }
+		  else {
+			Entity e = getNewEntity(cloneID);
+			entity.add(e);
+			newclone = e.getEntityID();
+			clones.put(cloneID, e.getEntityID());
+		  }
+		 for(long parent : ancestor) {
+			 link.add(new Link(parent, newclone));
+		 }
+		 
+		 for(long child : predecessor) {
+			 long childclone =  Integer.MIN_VALUE;
+			if(clones.containsKey(child)) {
+				childclone = clones.get(child);
+			}
+			else {
+			    Entity e = getNewEntity(child);
+				entity.add(e);
+				childclone = e.getEntityID();
+				clones.put(newclone, childclone);
+			}
+			 link.add(new Link(newclone, childclone));
+			 newclone = childclone;
+		 }
+	}
+	
+	public static Entity findAndCreateClone(long cloneID) {
 		for(Entity ent : entity) {
 			if(ent.getEntityID() == cloneID )
 			{
@@ -64,16 +121,17 @@ public class EntityCloning {
 		return null;
 	}
 	
-	public static void addEntity(int cloneID) {
+	public static Entity getNewEntity(long cloneID) {
 		Entity e = findAndCreateClone(cloneID);
 		if(e== null) {
             System.out.println("Not a valid clonable entity id");
+            System.exit(1);
 		}
 		else {
 			currentMaxID = currentMaxID+1;
 			e.setEntityID(currentMaxID);
-			entity.add(e);
 		}
+		return e;
 	}
 	
 	public static void printEntity()
@@ -84,16 +142,12 @@ public class EntityCloning {
 		}
 	}
 	
-	public static void addLinks(int cloneID) {
-		ArrayList<Entity> entitylist = new ArrayList<Entity>();
-		ArrayList<Link> linklist = new ArrayList<Link>();
-		
+	public static void printLink()
+	{
 		for(Link ln : link) {
-			if(ln.getFrom() == cloneID) {
-				// add two entities for from and to
-				
-			}
+			System.out.print(ln.getFrom()+"\t" + ln.getTo());
+			System.out.println();
 		}
-		
 	}
+	
 }
