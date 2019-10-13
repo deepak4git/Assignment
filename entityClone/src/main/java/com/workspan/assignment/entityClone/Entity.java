@@ -1,12 +1,17 @@
+/**  
+ * Entity.java -  Entity class with all the getter and setter methods.  
+ * @author  Deepak Kumar
+ */ 
+
 package com.workspan.assignment.entityClone;
 
 public class Entity implements Cloneable{
-    private long entityID ;
-    private String entityName;
-    private String entityDesc; 
-    public Entity() {
-    	
-    }
+	private long entityID ;
+	private String entityName;
+	private String entityDesc; 
+	public Entity() {
+
+	}
 	public Entity(long ID, String name,String desc) {
 		// TODO Auto-generated constructor stub
 		this.entityID = ID;
@@ -31,8 +36,8 @@ public class Entity implements Cloneable{
 	public void setEntityDesc(String entityDesc) {
 		this.entityDesc = entityDesc;
 	}
-	
+
 	public Object clone()throws CloneNotSupportedException{  
 		return super.clone();  
-		}
+	}
 }
